@@ -61,7 +61,9 @@ Open source software
 Capital markets
 Financial data
 Regulated and risk-sensitive industries
-Accounts Receivable (AR) Automation
+Accounts Receivable Automation
+Accounts Receivable
+CAMT.053 Bank Files
 
 [CERTIFICATIONS]
 Bachelor of Science, Economics (North Carolina State University)
