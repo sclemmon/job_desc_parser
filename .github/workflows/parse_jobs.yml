@@ -46,13 +46,17 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python skill_matcher.py
 
-      # Step 6: Commit any new files from both steps back to the repo
+      # Step 6: Generate formatted skills sections (reads tailored_skills/, outputs to skills_sections/)
+      - name: Generate skills sections
+        run: python generate_skills_section.py --batch
+
+      # Step 7: Commit any new files from all steps back to the repo
       # This only commits if there are actual changes
       - name: Commit results
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
-          git add parsed_jobs/ tailored_skills/
+          git add parsed_jobs/ tailored_skills/ skills_sections/
           # The || true means "if there's nothing to commit, don't fail"
           git diff --cached --quiet || git commit -m "Update parsed and tailored job data ($(date -u +%Y-%m-%d))"
       
