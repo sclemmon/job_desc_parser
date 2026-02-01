@@ -163,6 +163,18 @@ Return ONLY a valid JSON object with this exact structure (no markdown, no extra
 Rules:
 - Use the job posting's phrasing for skills in tailored_skills_section.
 - Only put a skill in a category if there is a genuine match to the candidate's inventory.
+- CRITICAL: Only include skills in tailored_skills_section if they are DIRECTLY mentioned in the
+  job posting OR clearly implied by specific requirements. Do NOT include generic skills that are
+  common to all product management roles but not specifically called out in this posting.
+  Examples:
+  - If the posting mentions "working with engineering teams" but does NOT mention JIRA, Confluence,
+    or any specific project management tools, do NOT include those tools.
+  - If the posting mentions "data analysis" or "working with data", you CAN include SQL, Python, or
+    data tools the candidate has.
+  - If the posting mentions "payments", "fintech", or "financial systems", you CAN include related
+    industry experience.
+  The test: Would an ATS keyword scan flag this skill? If the word/phrase doesn't appear in the
+  posting (or a close synonym), don't include it.
 - If a category has no matches, use an empty list — do not omit the category.
 - gaps should ONLY contain skills where the candidate has little to no relevant experience.
   These are things that would be genuinely difficult to argue for in an interview.
