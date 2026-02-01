@@ -40,15 +40,21 @@ jobs:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python job_parser.py
 
-      # Step 5: Commit any new parsed_jobs/*.json files back to the repo
-      # This only commits if there are actual changes (new jobs were parsed)
-      - name: Commit parsed results
+      # Step 5: Run the skill matcher (reads parsed_jobs/, outputs to tailored_skills/)
+      - name: Run skill matcher
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python skill_matcher.py
+
+      # Step 6: Commit any new files from both steps back to the repo
+      # This only commits if there are actual changes
+      - name: Commit results
         run: |
           git config --global user.email "github-actions@github.com"
           git config --global user.name "GitHub Actions"
-          git add parsed_jobs/
+          git add parsed_jobs/ tailored_skills/
           # The || true means "if there's nothing to commit, don't fail"
-          git diff --cached --quiet || git commit -m "Add parsed job descriptions ($(date -u +%Y-%m-%d))"
+          git diff --cached --quiet || git commit -m "Update parsed and tailored job data ($(date -u +%Y-%m-%d))"
       
       - name: Push changes
         run: git push
