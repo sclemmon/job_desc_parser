@@ -1,0 +1,18 @@
+# Baseline Skills
+# ----------------
+# These are your "always safe" skills that appear on your resume by default.
+# When a job posting doesn't have 9 strong matches, the generator will pad
+# with skills from this list to fill the 9-slot grid.
+#
+# These should be broadly applicable across most PM roles and accurate to your background.
+# List them in priority order (most important first).
+
+Product Strategy + Roadmapping
+Stakeholder Management
+SQL, Python
+Data Science
+Tableau, Looker, Omni, Databricks
+Agile Development
+Gen AI + Machine Learning
+JIRA, Confluence, Aha!
+Logrocket
