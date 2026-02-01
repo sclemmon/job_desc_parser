@@ -279,7 +279,9 @@ Prioritization logic:
   - If job-specific matches are all technical, add soft skills or strategic skills from baseline
   - Pick baseline skills that round out the skillset and show breadth
 - Do NOT force weak job-specific matches just to avoid using baseline skills
-- If a job-specific skill is generic (e.g. "JIRA" when the job never mentions it), don't count it as a strong match
+- Only include job-specific skills that are ACTUALLY relevant to this specific job posting
+- Tools and platforms should be included if they appear in the job requirements or are clearly relevant to the role
+- Examples of what NOT to include: generic skills that don't relate to this job's requirements
 
 Return ONLY a valid JSON array of exactly {max_slots} strings (no markdown, no explanation):
 ["skill1", "skill2", "skill3", "skill4", "skill5", "skill6", "skill7", "skill8", "skill9"]
