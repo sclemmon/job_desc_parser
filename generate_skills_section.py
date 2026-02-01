@@ -31,6 +31,7 @@ MAX_CHARS_PER_SLOT = 35  # "Gen AI + Machine Learning and thi" = 35 chars
 
 TAILORED_SKILLS_DIR = "tailored_skills"
 OUTPUT_DIR = "skills_sections"
+BASELINE_SKILLS_FILE = "baseline_skills.txt"
 
 # ---------------------------------------------------------------------------
 # STEP 1: Load the tailored skills JSON
@@ -40,6 +41,21 @@ def load_tailored_skills(filepath):
     """Reads a tailored_skills JSON file and returns the parsed data."""
     with open(filepath, "r") as f:
         return json.load(f)
+
+
+def load_baseline_skills(filepath):
+    """
+    Reads the baseline skills file and returns a list of default skills.
+    These are used as fallbacks when job-specific matches don't reach 9.
+    """
+    skills = []
+    with open(filepath, "r") as f:
+        for line in f:
+            line = line.strip()
+            # Skip blanks and comments
+            if line and not line.startswith("#"):
+                skills.append(line)
+    return skills
 
 
 # ---------------------------------------------------------------------------
@@ -64,30 +80,32 @@ def extract_skills(data):
 # STEP 3: Use LLM to intelligently condense skills to fit character limit
 # ---------------------------------------------------------------------------
 
-def condense_skills_with_llm(skills, max_chars=MAX_CHARS_PER_SLOT, max_slots=MAX_SLOTS):
+def condense_skills_with_llm(skills, baseline_skills, max_chars=MAX_CHARS_PER_SLOT, max_slots=MAX_SLOTS):
     """
     Sends the full list of skills to an LLM and asks it to:
-    1. Select the top 9 most important skills
-    2. Condense each one to fit within max_chars while preserving meaning
+    1. Identify strong job-specific matches
+    2. If fewer than 9 strong matches, pad with baseline skills to reach 9 total
+    3. Condense each one to fit within max_chars while preserving meaning
     
-    Returns a list of up to 9 condensed skill strings.
+    Returns a list of exactly 9 condensed skill strings.
     """
     from openai import OpenAI
     
     client = OpenAI()
     
     skills_text = "\n".join([f"  - {s}" for s in skills])
+    baseline_text = "\n".join([f"  - {s}" for s in baseline_skills])
     
     prompt = f"""You are a resume formatting assistant. A candidate needs to select and condense skills for their resume's "Areas of Expertise" section.
 
-Constraints:
-- The section has exactly {max_slots} slots (3 rows x 3 columns)
-- Each slot can hold a MAXIMUM of {max_chars} characters (including spaces)
-- Skills that exceed {max_chars} characters MUST be condensed intelligently
+You have two inputs:
+1. JOB-SPECIFIC SKILLS: Skills extracted from matching the candidate's background to this specific job posting
+2. BASELINE SKILLS: The candidate's default skills that are broadly applicable across PM roles
 
 Your task:
-1. Select the {max_slots} most important/relevant skills from the list below
-2. For each selected skill, if it's longer than {max_chars} characters, condense it intelligently:
+1. Identify the STRONG job-specific matches — skills that are directly relevant to this posting and would improve ATS screening odds
+2. If you have fewer than {max_slots} strong job-specific matches, pad the remaining slots with baseline skills (in the order they appear)
+3. For each selected skill, if it's longer than {max_chars} characters, condense it intelligently:
    - Preserve the core meaning
    - AVOID abbreviations unless absolutely necessary to fit the limit. Always try the full word first.
    - Only use abbreviations if the full version exceeds {max_chars} characters
@@ -95,18 +113,27 @@ Your task:
    - For lists, keep the most important items
    - Use "&" instead of "and" when natural
    - The goal is professional, scannable text — not cryptic abbreviations
-3. FORMAT: Use Title Case for every skill (capitalize the first letter of each major word)
+4. FORMAT: Use Title Case for every skill (capitalize the first letter of each major word)
    - Example: "product development" → "Product Development"
    - Example: "0-to-1 product dev" → "0-1 Product Development"
    - Keep common acronyms in all caps (SQL, API, ML, AI, AWS, etc.)
+
+Prioritization logic:
+- Strong job-specific matches come first
+- Baseline skills fill remaining slots, in the order provided
+- Do NOT force weak job-specific matches just to avoid using baseline skills
+- If a job-specific skill is generic (e.g. "JIRA" when the job never mentions it), don't count it as a strong match
 
 Return ONLY a valid JSON array of exactly {max_slots} strings (no markdown, no explanation):
 ["skill1", "skill2", "skill3", "skill4", "skill5", "skill6", "skill7", "skill8", "skill9"]
 
 Each string MUST be {max_chars} characters or fewer and in Title Case.
 
-Skills to select and condense from:
+JOB-SPECIFIC SKILLS (from matching this posting):
 {skills_text}
+
+BASELINE SKILLS (fallbacks to use if needed):
+{baseline_text}
 """
 
     response = client.chat.completions.create(
@@ -172,12 +199,13 @@ def format_as_columns(skills):
 # MAIN
 # ---------------------------------------------------------------------------
 
-def process_single_file(filepath, print_output=True, save_to_file=False, skip_if_exists=False):
+def process_single_file(filepath, baseline_skills, print_output=True, save_to_file=False, skip_if_exists=False):
     """
     Process a single tailored_skills JSON file.
     
     Args:
         filepath: Path to the JSON file
+        baseline_skills: List of default skills to use as fallbacks
         print_output: If True, print to console
         save_to_file: If True, save to skills_sections/ directory
         skip_if_exists: If True, skip if output file already exists
@@ -213,12 +241,13 @@ def process_single_file(filepath, print_output=True, save_to_file=False, skip_if
             print(f"No skills found in {filepath}")
         return None
     
-    # Use LLM to select top 9 and condense to fit character limit
+    # Use LLM to select strong matches and pad with baseline skills
     if print_output:
-        print(f"  Sending {len(skills)} skills to LLM for selection and condensing...")
+        print(f"  Sending {len(skills)} job-specific skills to LLM...")
+        print(f"  Baseline skills available for padding if needed")
     
     try:
-        top_skills = condense_skills_with_llm(skills)
+        top_skills = condense_skills_with_llm(skills, baseline_skills)
     except Exception as e:
         if print_output:
             print(f"  [ERROR] LLM condensing failed: {e}")
@@ -267,6 +296,15 @@ def process_batch():
     and save formatted outputs to skills_sections/.
     Skips files that already have an output.
     """
+    # Load baseline skills
+    if not os.path.exists(BASELINE_SKILLS_FILE):
+        print(f"Error: Baseline skills file not found: {BASELINE_SKILLS_FILE}")
+        print("Create this file with your default skills before running.")
+        return
+    
+    baseline_skills = load_baseline_skills(BASELINE_SKILLS_FILE)
+    print(f"Loaded {len(baseline_skills)} baseline skills from {BASELINE_SKILLS_FILE}")
+    
     files = sorted(glob.glob(os.path.join(TAILORED_SKILLS_DIR, "*.json")))
     
     if not files:
@@ -280,7 +318,7 @@ def process_batch():
     skipped = 0
     
     for filepath in files:
-        result = process_single_file(filepath, print_output=True, save_to_file=True, skip_if_exists=True)
+        result = process_single_file(filepath, baseline_skills, print_output=True, save_to_file=True, skip_if_exists=True)
         if result is None:
             skipped += 1
         else:
@@ -307,8 +345,16 @@ def main():
         print("  python generate_skills_section.py --batch")
         sys.exit(1)
     
+    # Load baseline skills
+    if not os.path.exists(BASELINE_SKILLS_FILE):
+        print(f"Error: Baseline skills file not found: {BASELINE_SKILLS_FILE}")
+        print("Create this file with your default skills before running.")
+        sys.exit(1)
+    
+    baseline_skills = load_baseline_skills(BASELINE_SKILLS_FILE)
+    
     filepath = sys.argv[1]
-    output = process_single_file(filepath, print_output=True, save_to_file=False)
+    output = process_single_file(filepath, baseline_skills, print_output=True, save_to_file=False)
     
     if output:
         print("\nCopy the section above and paste it into your resume.")
