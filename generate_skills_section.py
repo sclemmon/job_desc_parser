@@ -120,7 +120,11 @@ Your task:
 
 Prioritization logic:
 - Strong job-specific matches come first
-- Baseline skills fill remaining slots, in the order provided
+- If you need to use baseline skills to reach {max_slots} total, select the ones that maximize coverage
+  and diversity. For example:
+  - If job-specific matches already include SQL/Python, don't add more technical tools from baseline
+  - If job-specific matches are all technical, add soft skills or strategic skills from baseline
+  - Pick baseline skills that round out the skillset and show breadth
 - Do NOT force weak job-specific matches just to avoid using baseline skills
 - If a job-specific skill is generic (e.g. "JIRA" when the job never mentions it), don't count it as a strong match
 
