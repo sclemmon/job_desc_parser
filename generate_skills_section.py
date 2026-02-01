@@ -103,7 +103,7 @@ def extract_skills(data):
 # STEP 3: Use LLM to intelligently condense skills to fit character limit
 # ---------------------------------------------------------------------------
 
-def condense_skills_with_llm(skills, baseline_skills, max_chars=MAX_CHARS_PER_SLOT, max_slots=MAX_SLOTS):
+def condense_skills_with_llm(skills, baseline_skills, max_chars=MAX_CHARS_PER_SLOT, max_slots=MAX_SLOTS, retry_count=0):
     """
     Sends the full list of skills to an LLM and asks it to:
     1. Identify strong job-specific matches
@@ -135,17 +135,19 @@ Your task:
    - Only include skills that are specific and meaningful
 4. For each selected skill, if it's longer than {max_chars} characters, condense it intelligently:
    - Preserve the core meaning
-   - NEVER truncate with "..." — always rephrase to fit naturally within the limit
-   - AVOID abbreviations unless absolutely necessary to fit the limit. Always try the full word first.
-   - Only use abbreviations if the full version exceeds {max_chars} characters
-   - When abbreviations are necessary, use common professional ones (ML for Machine Learning, AI for Artificial Intelligence, etc.)
-   - For lists, keep the most important items
-   - Use "&" instead of "and" when natural
-   - The goal is professional, scannable text — not cryptic abbreviations
+   - CRITICAL: NEVER EVER truncate with "..." — always rephrase to fit naturally within the limit
+   - If a skill is too long, you MUST creatively shorten it using these techniques:
+     * Use "&" instead of "and"
+     * Drop articles (the, a, an)
+     * Use common abbreviations ONLY if the full version won't fit (ML for Machine Learning, AI for Artificial Intelligence, AP for Accounts Payable, AR for Accounts Receivable)
+     * Rephrase to be more concise while keeping the meaning
+   - Example: "Accounts Payable & Receivable Workflows" (40 chars) → "AP & AR Workflows" (17 chars)
+   - Example: "SaaS & Cloud-Based Financial Solutions" (38 chars) → "SaaS Financial Solutions" (24 chars)
+   - The goal is professional, scannable text — not cryptic abbreviations or truncation
 5. FORMAT: Use Title Case for every skill (capitalize the first letter of each major word)
    - Example: "product development" → "Product Development"
    - Example: "0-to-1 product dev" → "0-1 Product Development"
-   - Keep common acronyms in all caps (SQL, API, ML, AI, AWS, etc.)
+   - Keep common acronyms in all caps (SQL, API, ML, AI, AWS, AP, AR, etc.)
 
 Prioritization logic:
 - Strong job-specific matches come first
@@ -161,10 +163,11 @@ Return ONLY a valid JSON array of exactly {max_slots} strings (no markdown, no e
 ["skill1", "skill2", "skill3", "skill4", "skill5", "skill6", "skill7", "skill8", "skill9"]
 
 Each string MUST be {max_chars} characters or fewer and in Title Case.
-CRITICAL REMINDERS:
-- NEVER use "..." for truncation — rephrase to fit naturally
+ABSOLUTE REQUIREMENTS:
+- NEVER use "..." anywhere in any skill
 - NEVER include "Product Management" or "Product Management Experience"
-- If a skill doesn't fit in {max_chars} chars, creatively condense it (use &, drop articles, abbreviate only when necessary)
+- If a skill doesn't fit in {max_chars} chars, you MUST creatively condense it (use &, drop articles, abbreviate key terms only when necessary)
+- Every skill must be a complete, professional phrase — no truncation marks
 
 JOB-SPECIFIC SKILLS (from matching this posting):
 {skills_text}
@@ -191,6 +194,8 @@ BASELINE SKILLS (fallbacks to use if needed):
     
     # Post-processing validation and cleanup
     filtered = []
+    has_ellipses = False
+    
     for skill in condensed:
         # Filter out overly generic PM skills
         if any(generic in skill.lower() for generic in [
@@ -201,23 +206,35 @@ BASELINE SKILLS (fallbacks to use if needed):
         ]):
             continue  # Skip this skill
         
-        # Check for ellipses (should never happen)
+        # Check for ellipses
         if "..." in skill:
-            raise ValueError(f"LLM produced truncated skill with ellipses: '{skill}'. This should not happen.")
+            has_ellipses = True
+            print(f"  [WARNING] Skill contains ellipses: '{skill}'")
+            continue  # Skip this skill entirely
         
         # Validate character limit
         if len(skill) > max_chars:
-            # Force truncate if LLM didn't respect the limit, but log a warning
-            print(f"  [WARNING] Skill exceeds {max_chars} chars, force truncating: '{skill}'")
-            skill = skill[:max_chars - 3] + "..."
+            print(f"  [WARNING] Skill exceeds {max_chars} chars: '{skill}' ({len(skill)} chars)")
+            continue  # Skip this skill
         
         filtered.append(skill)
     
-    # If we filtered out skills and now have fewer than max_slots, that's an error
-    if len(filtered) < max_slots:
-        print(f"  [WARNING] Only {len(filtered)} valid skills after filtering. Re-running may help.")
+    # If we found ellipses and this is our first attempt, retry
+    if has_ellipses and retry_count == 0:
+        print(f"  [RETRY] Ellipses detected. Regenerating skills...")
+        return condense_skills_with_llm(skills, baseline_skills, max_chars, max_slots, retry_count=1)
     
-    return filtered
+    # If we filtered out skills and now have fewer than max_slots, that's a problem
+    if len(filtered) < max_slots:
+        print(f"  [WARNING] Only {len(filtered)} valid skills after filtering (need {max_slots}). This may leave empty slots.")
+        # Pad with remaining baseline skills to avoid empty slots
+        for baseline in baseline_skills:
+            if len(filtered) >= max_slots:
+                break
+            if baseline not in filtered and len(baseline) <= max_chars:
+                filtered.append(baseline)
+    
+    return filtered[:max_slots]  # Ensure we return exactly max_slots
 
 
 # ---------------------------------------------------------------------------
