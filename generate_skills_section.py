@@ -104,16 +104,22 @@ You have two inputs:
 
 Your task:
 1. Identify the STRONG job-specific matches — skills that are directly relevant to this posting and would improve ATS screening odds
-2. If you have fewer than {max_slots} strong job-specific matches, pad the remaining slots with baseline skills (in the order they appear)
-3. For each selected skill, if it's longer than {max_chars} characters, condense it intelligently:
+2. If you have fewer than {max_slots} strong job-specific matches, pad the remaining slots with baseline skills that maximize diversity
+3. CRITICAL: Filter out overly generic skills that are obvious given the role:
+   - NEVER include "Product Management" or "Product Management Experience" — this is redundant for a PM role
+   - NEVER include "Product Manager" or variations like "Experienced Product Manager"
+   - Avoid other self-evident skills like "Problem Solving" or "Working with Teams"
+   - Only include skills that are specific and meaningful
+4. For each selected skill, if it's longer than {max_chars} characters, condense it intelligently:
    - Preserve the core meaning
+   - NEVER truncate with "..." — always rephrase to fit naturally within the limit
    - AVOID abbreviations unless absolutely necessary to fit the limit. Always try the full word first.
    - Only use abbreviations if the full version exceeds {max_chars} characters
    - When abbreviations are necessary, use common professional ones (ML for Machine Learning, AI for Artificial Intelligence, etc.)
    - For lists, keep the most important items
    - Use "&" instead of "and" when natural
    - The goal is professional, scannable text — not cryptic abbreviations
-4. FORMAT: Use Title Case for every skill (capitalize the first letter of each major word)
+5. FORMAT: Use Title Case for every skill (capitalize the first letter of each major word)
    - Example: "product development" → "Product Development"
    - Example: "0-to-1 product dev" → "0-1 Product Development"
    - Keep common acronyms in all caps (SQL, API, ML, AI, AWS, etc.)
@@ -132,6 +138,10 @@ Return ONLY a valid JSON array of exactly {max_slots} strings (no markdown, no e
 ["skill1", "skill2", "skill3", "skill4", "skill5", "skill6", "skill7", "skill8", "skill9"]
 
 Each string MUST be {max_chars} characters or fewer and in Title Case.
+CRITICAL REMINDERS:
+- NEVER use "..." for truncation — rephrase to fit naturally
+- NEVER include "Product Management" or "Product Management Experience"
+- If a skill doesn't fit in {max_chars} chars, creatively condense it (use &, drop articles, abbreviate only when necessary)
 
 JOB-SPECIFIC SKILLS (from matching this posting):
 {skills_text}
@@ -156,13 +166,35 @@ BASELINE SKILLS (fallbacks to use if needed):
     
     condensed = json.loads(raw)
     
-    # Validate that each skill is within the character limit
-    for i, skill in enumerate(condensed):
+    # Post-processing validation and cleanup
+    filtered = []
+    for skill in condensed:
+        # Filter out overly generic PM skills
+        if any(generic in skill.lower() for generic in [
+            "product management experience",
+            "product management",
+            "experienced product manager",
+            "product manager"
+        ]):
+            continue  # Skip this skill
+        
+        # Check for ellipses (should never happen)
+        if "..." in skill:
+            raise ValueError(f"LLM produced truncated skill with ellipses: '{skill}'. This should not happen.")
+        
+        # Validate character limit
         if len(skill) > max_chars:
-            # Force truncate if LLM didn't respect the limit
-            condensed[i] = skill[:max_chars - 3] + "..."
+            # Force truncate if LLM didn't respect the limit, but log a warning
+            print(f"  [WARNING] Skill exceeds {max_chars} chars, force truncating: '{skill}'")
+            skill = skill[:max_chars - 3] + "..."
+        
+        filtered.append(skill)
     
-    return condensed
+    # If we filtered out skills and now have fewer than max_slots, that's an error
+    if len(filtered) < max_slots:
+        print(f"  [WARNING] Only {len(filtered)} valid skills after filtering. Re-running may help.")
+    
+    return filtered
 
 
 # ---------------------------------------------------------------------------
