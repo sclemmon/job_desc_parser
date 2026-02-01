@@ -212,7 +212,15 @@ BASELINE SKILLS (fallbacks to use if needed):
             print(f"  [WARNING] Skill contains ellipses: '{skill}'")
             continue  # Skip this skill entirely
         
-        # Validate character limit
+        # Strip redundant " Skills" suffix/infix
+        # E.g. "Leadership Skills" → "Leadership"
+        # E.g. "Product Design & Development Skills" → "Product Design & Development"
+        if skill.endswith(" Skills"):
+            skill = skill[:-7]  # Remove " Skills" (7 characters)
+        elif skill.endswith(" Skill"):
+            skill = skill[:-6]  # Remove " Skill" (6 characters)
+        
+        # Validate character limit (after cleanup)
         if len(skill) > max_chars:
             print(f"  [WARNING] Skill exceeds {max_chars} chars: '{skill}' ({len(skill)} chars)")
             continue  # Skip this skill
