@@ -62,6 +62,29 @@ def load_baseline_skills(filepath):
 # STEP 2: Extract and flatten all skills from the tailored section
 # ---------------------------------------------------------------------------
 
+def get_output_filename(data):
+    """
+    Generates a human-readable filename for the output based on job title and company.
+    E.g. "Senior_Product_Manager_Acme_Corp_skills.txt"
+    """
+    job_title = data.get("job_title", "Unknown_Role")
+    company = data.get("company", "Unknown_Company")
+    
+    # Sanitize for filenames: keep alphanumeric, spaces, and hyphens
+    safe_title = "".join(c if c.isalnum() or c in (' ', '-') else '' for c in job_title)
+    safe_company = "".join(c if c.isalnum() or c in (' ', '-') else '' for c in company)
+    
+    # Replace spaces with underscores
+    safe_title = safe_title.replace(' ', '_').strip('_')
+    safe_company = safe_company.replace(' ', '_').strip('_')
+    
+    # Truncate if too long
+    safe_title = safe_title[:50]
+    safe_company = safe_company[:30]
+    
+    return f"{safe_title}_{safe_company}_skills.txt"
+
+
 def extract_skills(data):
     """
     Pulls all skills from the tailored_skills_section.
@@ -248,26 +271,27 @@ def process_single_file(filepath, baseline_skills, print_output=True, save_to_fi
     
     Returns the formatted skills section as a string.
     """
-    # Check if output already exists
+    # Load data first to get job title and company for filename
+    try:
+        data = load_tailored_skills(filepath)
+    except FileNotFoundError:
+        if print_output:
+            print(f"Error: File not found: {filepath}")
+        return None
+    except json.JSONDecodeError:
+        if print_output:
+            print(f"Error: Invalid JSON in {filepath}")
+        return None
+    
+    # Check if output already exists (using human-readable filename)
     if skip_if_exists and save_to_file:
-        source_filename = os.path.basename(filepath)
-        output_filename = source_filename.replace(".json", "_skills.txt")
+        output_filename = get_output_filename(data)
         output_path = os.path.join(OUTPUT_DIR, output_filename)
         
         if os.path.exists(output_path):
             if print_output:
                 print(f"[SKIP] Skills section already exists: {output_path}")
             return None
-    
-    # Load data
-    try:
-        data = load_tailored_skills(filepath)
-    except FileNotFoundError:
-        print(f"Error: File not found: {filepath}")
-        return None
-    except json.JSONDecodeError:
-        print(f"Error: Invalid JSON in {filepath}")
-        return None
     
     # Extract skills
     skills = extract_skills(data)
@@ -313,8 +337,7 @@ def process_single_file(filepath, baseline_skills, print_output=True, save_to_fi
     # Save to file if requested
     if save_to_file:
         os.makedirs(OUTPUT_DIR, exist_ok=True)
-        source_filename = os.path.basename(filepath)
-        output_filename = source_filename.replace(".json", "_skills.txt")
+        output_filename = get_output_filename(data)
         output_path = os.path.join(OUTPUT_DIR, output_filename)
         
         with open(output_path, "w") as f:
