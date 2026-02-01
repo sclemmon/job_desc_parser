@@ -61,6 +61,7 @@ Open source software
 Capital markets
 Financial data
 Regulated and risk-sensitive industries
+Accounts Receivable (AR) Automation
 
 [CERTIFICATIONS]
 Bachelor of Science, Economics (North Carolina State University)
