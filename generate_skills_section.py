@@ -64,8 +64,8 @@ def load_baseline_skills(filepath):
 
 def get_output_filename(data):
     """
-    Generates a human-readable filename for the output based on job title and company.
-    E.g. "Senior_Product_Manager_Acme_Corp_skills.txt"
+    Generates a human-readable filename for the output based on company and job title.
+    E.g. "Acme_Corp_Senior_Product_Manager_skills.txt"
     """
     job_title = data.get("job_title", "Unknown_Role")
     company = data.get("company", "Unknown_Company")
@@ -82,7 +82,7 @@ def get_output_filename(data):
     safe_title = safe_title[:50]
     safe_company = safe_company[:30]
     
-    return f"{safe_title}_{safe_company}_skills.txt"
+    return f"{safe_company}_{safe_title}_skills.txt"
 
 
 def extract_skills(data):
