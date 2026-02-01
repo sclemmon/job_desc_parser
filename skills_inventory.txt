@@ -25,6 +25,7 @@ Skunkworks / exploratory projects
 Competitive analysis
 Product experimentation framework design
 Intake and prioritization of cross-functional requests
+Ability to translate complex financial and technical concepts into clear, actionable product requirements
 
 [TECHNICAL_TOOLS]
 SQL
