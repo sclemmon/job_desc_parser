@@ -12,7 +12,6 @@
 [REQUIRED_AND_PREFERRED_SKILLS]
 Product strategy
 Roadmapping
-Stakeholder management
 Cross-functional collaboration
 Prioritization
 Product vision
@@ -25,7 +24,7 @@ Skunkworks / exploratory projects
 Competitive analysis
 Product experimentation framework design
 Intake and prioritization of cross-functional requests
-Ability to translate complex financial and technical concepts into clear, actionable product requirements
+Translating technical concepts to business requirements
 
 [TECHNICAL_TOOLS]
 SQL
@@ -43,6 +42,7 @@ Experience working closely with data science
 Data analysis
 Data visualization
 Customer reporting and alerting
+CAMT.053 bank files
 
 [LANGUAGES_AND_FRAMEWORKS]
 SQL
@@ -62,9 +62,8 @@ Open source software
 Capital markets
 Financial data
 Regulated and risk-sensitive industries
-Accounts Receivable Automation
-Accounts Receivable
-CAMT.053 Bank Files
+Accounts receivable automation
+Accounts payable automation
 
 [CERTIFICATIONS]
 Bachelor of Science, Economics (North Carolina State University)
@@ -74,7 +73,6 @@ Statistics Foundations (LinkedIn Learning)
 
 [SOFT_SKILLS]
 Stakeholder management
-Cross-functional collaboration
 Executive communication
 Pushback and negotiation
 Self-directed / high autonomy
