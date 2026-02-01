@@ -4,6 +4,9 @@ generate_skills_section.py
 Reads tailored_skills JSON files and generates formatted "Areas of Expertise"
 sections that fit your resume's 9-slot, 35-character-per-slot layout.
 
+UPDATED VERSION: Added explicit duplicate handling to prevent duplicate skills
+in the final output.
+
 Usage:
     # Single file mode (prints to console)
     python generate_skills_section.py <path_to_tailored_skills_json>
@@ -21,6 +24,7 @@ import os
 import json
 import glob
 from textwrap import wrap
+import re
 
 # ---------------------------------------------------------------------------
 # CONFIGURATION
@@ -32,6 +36,114 @@ MAX_CHARS_PER_SLOT = 35  # "Gen AI + Machine Learning and thi" = 35 chars
 TAILORED_SKILLS_DIR = "tailored_skills"
 OUTPUT_DIR = "skills_sections"
 BASELINE_SKILLS_FILE = "baseline_skills.txt"
+
+# ---------------------------------------------------------------------------
+# DUPLICATE DETECTION UTILITIES
+# ---------------------------------------------------------------------------
+
+def normalize_skill(skill):
+    """
+    Normalize a skill for duplicate detection by:
+    - Converting to lowercase
+    - Removing special characters and extra whitespace
+    - Standardizing common abbreviations
+    """
+    # Convert to lowercase
+    normalized = skill.lower().strip()
+    
+    # Remove special characters and normalize whitespace
+    normalized = re.sub(r'[^\w\s]', ' ', normalized)
+    normalized = re.sub(r'\s+', ' ', normalized).strip()
+    
+    # Standardize common abbreviations/variations
+    abbreviations = {
+        'artificial intelligence': 'ai',
+        'machine learning': 'ml',
+        'application programming interface': 'api',
+        'user experience': 'ux',
+        'user interface': 'ui',
+        'accounts payable': 'ap',
+        'accounts receivable': 'ar',
+        'software as a service': 'saas',
+        'amazon web services': 'aws',
+        'structured query language': 'sql',
+        'product management': 'pm',
+        'project management': 'pm',
+        'customer relationship management': 'crm',
+        'enterprise resource planning': 'erp',
+        'business intelligence': 'bi',
+        'key performance indicator': 'kpi',
+        'return on investment': 'roi',
+        'quality assurance': 'qa',
+        'research and development': 'r&d',
+        'mergers and acquisitions': 'm&a'
+    }
+    
+    for full_form, abbrev in abbreviations.items():
+        normalized = normalized.replace(full_form, abbrev)
+    
+    return normalized
+
+def are_skills_similar(skill1, skill2, similarity_threshold=0.8):
+    """
+    Check if two skills are similar enough to be considered duplicates.
+    Uses normalized forms and checks for substring containment.
+    """
+    norm1 = normalize_skill(skill1)
+    norm2 = normalize_skill(skill2)
+    
+    # Exact match after normalization
+    if norm1 == norm2:
+        return True
+    
+    # One is contained in the other (for cases like "SQL" vs "SQL Databases")
+    if norm1 in norm2 or norm2 in norm1:
+        # Only consider it a duplicate if the shorter one is substantial
+        min_len = min(len(norm1), len(norm2))
+        if min_len >= 3:  # Avoid flagging very short terms as duplicates
+            return True
+    
+    # Check for word overlap (for compound skills)
+    words1 = set(norm1.split())
+    words2 = set(norm2.split())
+    
+    # Skip single-word skills for this check
+    if len(words1) <= 1 or len(words2) <= 1:
+        return False
+    
+    # Calculate Jaccard similarity (intersection over union)
+    intersection = words1.intersection(words2)
+    union = words1.union(words2)
+    
+    if len(union) > 0:
+        jaccard_similarity = len(intersection) / len(union)
+        return jaccard_similarity >= similarity_threshold
+    
+    return False
+
+def remove_duplicates(skills):
+    """
+    Remove duplicate skills from a list while preserving order.
+    Uses fuzzy matching to catch similar skills.
+    """
+    unique_skills = []
+    
+    for skill in skills:
+        # Skip empty skills
+        if not skill or not skill.strip():
+            continue
+            
+        # Check if this skill is similar to any already selected
+        is_duplicate = False
+        for existing_skill in unique_skills:
+            if are_skills_similar(skill, existing_skill):
+                is_duplicate = True
+                break
+        
+        if not is_duplicate:
+            unique_skills.append(skill)
+    
+    return unique_skills
 
 # ---------------------------------------------------------------------------
 # STEP 1: Load the tailored skills JSON
@@ -88,7 +200,7 @@ def get_output_filename(data):
 def extract_skills(data):
     """
     Pulls all skills from the tailored_skills_section.
-    Returns a flat list of skill strings.
+    Returns a flat list of skill strings with duplicates removed.
     """
     skills = []
     tailored = data.get("tailored_skills_section", {})
@@ -96,7 +208,8 @@ def extract_skills(data):
     for category, skill_list in tailored.items():
         skills.extend(skill_list)
     
-    return skills
+    # Remove duplicates before returning
+    return remove_duplicates(skills)
 
 
 # ---------------------------------------------------------------------------
@@ -110,14 +223,18 @@ def condense_skills_with_llm(skills, baseline_skills, max_chars=MAX_CHARS_PER_SL
     2. If fewer than 9 strong matches, pad with baseline skills to reach 9 total
     3. Condense each one to fit within max_chars while preserving meaning
     
-    Returns a list of exactly 9 condensed skill strings.
+    Returns a list of exactly 9 condensed skill strings with no duplicates.
     """
     from openai import OpenAI
     
     client = OpenAI()
     
-    skills_text = "\n".join([f"  - {s}" for s in skills])
-    baseline_text = "\n".join([f"  - {s}" for s in baseline_skills])
+    # Remove duplicates from input skills first
+    unique_skills = remove_duplicates(skills)
+    unique_baseline = remove_duplicates(baseline_skills)
+    
+    skills_text = "\n".join([f"  - {s}" for s in unique_skills])
+    baseline_text = "\n".join([f"  - {s}" for s in unique_baseline])
     
     prompt = f"""You are a resume formatting assistant. A candidate needs to select and condense skills for their resume's "Areas of Expertise" section.
 
@@ -133,7 +250,12 @@ Your task:
    - NEVER include "Product Manager" or variations like "Experienced Product Manager"
    - Avoid other self-evident skills like "Problem Solving" or "Working with Teams"
    - Only include skills that are specific and meaningful
-4. For each selected skill, if it's longer than {max_chars} characters, condense it intelligently:
+4. ELIMINATE DUPLICATES: Do not include skills that are essentially the same thing:
+   - "SQL" and "SQL Databases" are duplicates
+   - "Machine Learning" and "ML" are duplicates
+   - "API Development" and "API Design" are duplicates
+   - Choose the most concise, professional version
+5. For each selected skill, if it's longer than {max_chars} characters, condense it intelligently:
    - Preserve the core meaning
    - CRITICAL: NEVER EVER truncate with "..." — always rephrase to fit naturally within the limit
    - If a skill is too long, you MUST creatively shorten it using these techniques:
@@ -144,7 +266,7 @@ Your task:
    - Example: "Accounts Payable & Receivable Workflows" (40 chars) → "AP & AR Workflows" (17 chars)
    - Example: "SaaS & Cloud-Based Financial Solutions" (38 chars) → "SaaS Financial Solutions" (24 chars)
    - The goal is professional, scannable text — not cryptic abbreviations or truncation
-5. FORMAT: Use Title Case for every skill (capitalize the first letter of each major word)
+6. FORMAT: Use Title Case for every skill (capitalize the first letter of each major word)
    - Example: "product development" → "Product Development"
    - Example: "0-to-1 product dev" → "0-1 Product Development"
    - Keep common acronyms in all caps (SQL, API, ML, AI, AWS, AP, AR, etc.)
@@ -164,6 +286,7 @@ Return ONLY a valid JSON array of exactly {max_slots} strings (no markdown, no e
 
 Each string MUST be {max_chars} characters or fewer and in Title Case.
 ABSOLUTE REQUIREMENTS:
+- NO DUPLICATES: Each skill must be meaningfully different from all others
 - NEVER use "..." anywhere in any skill
 - NEVER include "Product Management" or "Product Management Experience"
 - If a skill doesn't fit in {max_chars} chars, you MUST creatively condense it (use &, drop articles, abbreviate key terms only when necessary)
@@ -209,40 +332,41 @@ BASELINE SKILLS (fallbacks to use if needed):
         # Check for ellipses
         if "..." in skill:
             has_ellipses = True
-            print(f"  [WARNING] Skill contains ellipses: '{skill}'")
-            continue  # Skip this skill entirely
+            continue  # Skip skills with ellipses
         
-        # Strip redundant " Skills" suffix/infix
-        # E.g. "Leadership Skills" → "Leadership"
-        # E.g. "Product Design & Development Skills" → "Product Design & Development"
-        if skill.endswith(" Skills"):
-            skill = skill[:-7]  # Remove " Skills" (7 characters)
-        if skill.endswith(" Skill"):
-            skill = skill[:-6]  # Remove " Skill" (6 characters)
-        elif skill.endswith(" Expertise"):
-            skill = skill[:-10] # Remove " Expertise" (10 characters)
-        
-        # Validate character limit (after cleanup)
-        if len(skill) > max_chars:
-            print(f"  [WARNING] Skill exceeds {max_chars} chars: '{skill}' ({len(skill)} chars)")
-            continue  # Skip this skill
-        
-        filtered.append(skill)
+        # Check character limit
+        if len(skill) <= max_chars:
+            filtered.append(skill)
     
-    # If we found ellipses and this is our first attempt, retry
-    if has_ellipses and retry_count == 0:
-        print(f"  [RETRY] Ellipses detected. Regenerating skills...")
-        return condense_skills_with_llm(skills, baseline_skills, max_chars, max_slots, retry_count=1)
+    # Remove duplicates from the LLM output as well
+    filtered = remove_duplicates(filtered)
     
-    # If we filtered out skills and now have fewer than max_slots, that's a problem
+    # If we still have ellipses or too few skills, retry once
+    if (has_ellipses or len(filtered) < max_slots) and retry_count < 1:
+        print(f"  [WARNING] LLM returned {len(filtered)} skills (some with ellipses). Retrying...")
+        return condense_skills_with_llm(unique_skills, unique_baseline, max_chars, max_slots, retry_count + 1)
+    
+    # If we still don't have enough after LLM processing, pad with baseline skills
     if len(filtered) < max_slots:
-        print(f"  [WARNING] Only {len(filtered)} valid skills after filtering (need {max_slots}). This may leave empty slots.")
-        # Pad with remaining baseline skills to avoid empty slots
-        for baseline in baseline_skills:
+        print(f"  [INFO] Only {len(filtered)} skills after LLM processing. Padding with baseline skills...")
+        
+        # Get baseline skills that aren't already included (checking for similarity, not just exact matches)
+        available_baseline = []
+        for baseline in unique_baseline:
+            is_similar_to_existing = False
+            for existing_skill in filtered:
+                if are_skills_similar(baseline, existing_skill):
+                    is_similar_to_existing = True
+                    break
+            
+            if not is_similar_to_existing and len(baseline) <= max_chars:
+                available_baseline.append(baseline)
+        
+        # Add baseline skills until we reach max_slots
+        for baseline in available_baseline:
             if len(filtered) >= max_slots:
                 break
-            if baseline not in filtered and len(baseline) <= max_chars:
-                filtered.append(baseline)
+            filtered.append(baseline)
     
     return filtered[:max_slots]  # Ensure we return exactly max_slots
 
@@ -320,7 +444,7 @@ def process_single_file(filepath, baseline_skills, print_output=True, save_to_fi
                 print(f"[SKIP] Skills section already exists: {output_path}")
             return None
     
-    # Extract skills
+    # Extract skills (now with built-in duplicate removal)
     skills = extract_skills(data)
     
     if not skills:
@@ -330,7 +454,7 @@ def process_single_file(filepath, baseline_skills, print_output=True, save_to_fi
     
     # Use LLM to select strong matches and pad with baseline skills
     if print_output:
-        print(f"  Sending {len(skills)} job-specific skills to LLM...")
+        print(f"  Sending {len(skills)} unique job-specific skills to LLM...")
         print(f"  Baseline skills available for padding if needed")
     
     try:
@@ -339,6 +463,9 @@ def process_single_file(filepath, baseline_skills, print_output=True, save_to_fi
         if print_output:
             print(f"  [ERROR] LLM condensing failed: {e}")
         return None
+    
+    # Final duplicate check (defensive programming)
+    top_skills = remove_duplicates(top_skills)
     
     # Format
     formatted = format_as_columns(top_skills)
