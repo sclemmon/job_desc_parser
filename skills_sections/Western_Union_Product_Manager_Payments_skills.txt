@@ -1,0 +1,13 @@
+TAILORED SKILLS SECTION
+Job: Product Manager, Payments
+Company: Western Union
+================================================================================
+
+Areas of Expertise
+===================================================================================================================
+
+          Agile Processes                          Fintech                      Stakeholder Management
+               JIRA                               Payments                                SQL
+            Confluence                       Financial Services                      Data Science
+
+================================================================================
