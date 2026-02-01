@@ -87,11 +87,27 @@ def load_parsed_jobs(directory):
 
 def get_output_path(job):
     """
-    Generates the output path for a matched job, mirroring the source filename.
-    E.g. parsed_jobs/job_a1b2c3d4.json -> tailored_skills/job_a1b2c3d4.json
+    Generates a human-readable output path for a matched job.
+    Uses company and job title from the parsed data.
+    E.g. tailored_skills/Acme_Corp_Senior_Product_Manager.json
     """
-    source_filename = os.path.basename(job["_source_file"])
-    return os.path.join(OUTPUT_DIR, source_filename)
+    job_title = job.get("job_title", "Unknown_Role")
+    company = job.get("company", "Unknown_Company")
+    
+    # Sanitize for filenames: keep alphanumeric, spaces, and hyphens
+    safe_title = "".join(c if c.isalnum() or c in (' ', '-') else '' for c in job_title)
+    safe_company = "".join(c if c.isalnum() or c in (' ', '-') else '' for c in company)
+    
+    # Replace spaces with underscores
+    safe_title = safe_title.replace(' ', '_').strip('_')
+    safe_company = safe_company.replace(' ', '_').strip('_')
+    
+    # Truncate if too long
+    safe_title = safe_title[:50]
+    safe_company = safe_company[:30]
+    
+    filename = f"{safe_company}_{safe_title}.json"
+    return os.path.join(OUTPUT_DIR, filename)
 
 
 def already_matched(job):
