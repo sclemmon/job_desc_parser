@@ -89,16 +89,21 @@ Your task:
 1. Select the {max_slots} most important/relevant skills from the list below
 2. For each selected skill, if it's longer than {max_chars} characters, condense it intelligently:
    - Preserve the core meaning
-   - Use common abbreviations where appropriate (ML for Machine Learning, AI for Artificial Intelligence, etc.)
+   - AVOID abbreviations unless absolutely necessary to fit the limit. Always try the full word first.
+   - Only use abbreviations if the full version exceeds {max_chars} characters
+   - When abbreviations are necessary, use common professional ones (ML for Machine Learning, AI for Artificial Intelligence, etc.)
    - For lists, keep the most important items
    - Use "&" instead of "and" when natural
-   - Use abbreviations like "Mgmt" for Management, "Dev" for Development when it fits the style
    - The goal is professional, scannable text — not cryptic abbreviations
+3. FORMAT: Use Title Case for every skill (capitalize the first letter of each major word)
+   - Example: "product development" → "Product Development"
+   - Example: "0-to-1 product dev" → "0-1 Product Development"
+   - Keep common acronyms in all caps (SQL, API, ML, AI, AWS, etc.)
 
 Return ONLY a valid JSON array of exactly {max_slots} strings (no markdown, no explanation):
 ["skill1", "skill2", "skill3", "skill4", "skill5", "skill6", "skill7", "skill8", "skill9"]
 
-Each string MUST be {max_chars} characters or fewer.
+Each string MUST be {max_chars} characters or fewer and in Title Case.
 
 Skills to select and condense from:
 {skills_text}
