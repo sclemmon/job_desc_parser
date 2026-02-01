@@ -217,10 +217,10 @@ BASELINE SKILLS (fallbacks to use if needed):
         # E.g. "Product Design & Development Skills" → "Product Design & Development"
         if skill.endswith(" Skills"):
             skill = skill[:-7]  # Remove " Skills" (7 characters)
-        elif skill.endswith(" Skill"):
+        if skill.endswith(" Skill"):
             skill = skill[:-6]  # Remove " Skill" (6 characters)
         elif skill.endswith(" Expertise"):
-            skill = skill[:-10] # Remove " Expertise" (10 characters
+            skill = skill[:-10] # Remove " Expertise" (10 characters)
         
         # Validate character limit (after cleanup)
         if len(skill) > max_chars:
