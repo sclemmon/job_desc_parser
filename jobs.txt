@@ -1,0 +1,9 @@
+# Job Description URLs
+# ---------------------
+# Add LinkedIn (or other job board) URLs here, one per line.
+# Lines starting with # are comments and will be ignored.
+# Blank lines are also ignored.
+#
+# Example:
+# https://www.linkedin.com/jobs/view/1234567890
+

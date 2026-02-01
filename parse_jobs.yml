@@ -1,0 +1,54 @@
+name: Parse Job Descriptions
+
+on:
+  # Run every day at 8:00 AM UTC (3:00 AM ET / 5:00 AM CT / 12:00 AM PT)
+  schedule:
+    - cron: '0 8 * * *'
+
+  # Also run whenever jobs.txt is changed and pushed
+  push:
+    paths:
+      - 'jobs.txt'
+
+  # Allow you to trigger it manually from the GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  parse:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Download the repo code onto the runner
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Install Python
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Step 3: Install the Python packages listed in requirements.txt
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Step 4: Run the parser script
+      # The OPENAI_API_KEY is stored as a secret in your GitHub repo settings
+      # (see the guide for how to set this up)
+      - name: Run job parser
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: python job_parser.py
+
+      # Step 5: Commit any new parsed_jobs/*.json files back to the repo
+      # This only commits if there are actual changes (new jobs were parsed)
+      - name: Commit parsed results
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git add parsed_jobs/
+          # The || true means "if there's nothing to commit, don't fail"
+          git diff --cached --quiet || git commit -m "Add parsed job descriptions ($(date -u +%Y-%m-%d))"
+      
+      - name: Push changes
+        run: git push
