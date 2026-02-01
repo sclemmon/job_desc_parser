@@ -48,6 +48,8 @@ jobs:
 
       # Step 6: Generate formatted skills sections (reads tailored_skills/, outputs to skills_sections/)
       - name: Generate skills sections
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
         run: python generate_skills_section.py --batch
 
       # Step 7: Commit any new files from all steps back to the repo
