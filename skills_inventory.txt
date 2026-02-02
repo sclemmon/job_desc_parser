@@ -47,6 +47,7 @@ CAMT.053 bank files
 Azure Document Intelligence
 AWS Textract
 PowerBI
+Data Modeling
 
 [LANGUAGES_AND_FRAMEWORKS]
 SQL
