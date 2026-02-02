@@ -43,6 +43,8 @@ Data analysis
 Data visualization
 Customer reporting and alerting
 CAMT.053 bank files
+Azure Document Intelligence
+AWS Textract
 
 [LANGUAGES_AND_FRAMEWORKS]
 SQL
