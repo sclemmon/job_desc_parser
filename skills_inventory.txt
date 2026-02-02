@@ -25,6 +25,7 @@ Competitive analysis
 Product experimentation framework design
 Intake and prioritization of cross-functional requests
 Translating technical concepts to business requirements
+A/B Testing
 
 [TECHNICAL_TOOLS]
 SQL
