@@ -1,0 +1,13 @@
+TAILORED SKILLS SECTION
+Job: RevOps Product Manager
+Company: Sage
+================================================================================
+
+Areas of Expertise
+===================================================================================================================
+
+          Sales Processes                        Salesforce                 Product Strategy & Roadmapping
+        Marketing Processes                       B2B SaaS                         Agile Development
+    Customer Success Processes             Stakeholder Engagement                    Data Science
+
+================================================================================

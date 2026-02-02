@@ -1,0 +1,13 @@
+TAILORED SKILLS SECTION
+Job: Staff Product Manager
+Company: Hertz
+================================================================================
+
+Areas of Expertise
+===================================================================================================================
+
+ Exceptional Communication Skills       Demonstrated Bias for Action                      SQL
+   Clear & Concise Communication       Product Strategy & Roadmapping              Agile Development
+    Ability to Manage Ambiguity            Stakeholder Management              Gen AI & Machine Learning
+
+================================================================================

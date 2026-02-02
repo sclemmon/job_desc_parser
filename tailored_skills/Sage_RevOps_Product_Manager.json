@@ -1,0 +1,38 @@
+{
+  "source_url": "https://www.linkedin.com/jobs/view/4323973728",
+  "matched_at": "2026-02-02T13:17:57.742504",
+  "job_title": "RevOps Product Manager",
+  "company": "Sage",
+  "match_summary": "The candidate has a strong background in product management and relevant industry experience, particularly in fintech and enterprise SaaS, which aligns well with the requirements of the RevOps Product Manager role. However, there are some gaps in specific tools and processes mentioned in the job description.",
+  "tailored_skills_section": {
+    "Technical Skills": [
+      "Sales processes",
+      "Marketing processes",
+      "Customer Success processes"
+    ],
+    "Tools & Platforms": [
+      "Salesforce"
+    ],
+    "Industry Experience": [
+      "B2B SaaS"
+    ],
+    "Soft Skills & Leadership": [
+      "Stakeholder engagement",
+      "Communication"
+    ]
+  },
+  "gaps": [
+    "Revenue Operations",
+    "GTM Systems",
+    "Business Operations",
+    "Power BI",
+    "Snowflake",
+    "Clari",
+    "Chorus"
+  ],
+  "partial_matches": [
+    "Experience driving alignment across leadership and end users",
+    "Agile or iterative delivery"
+  ],
+  "notes": "The candidate should emphasize their experience in stakeholder engagement and communication, as well as their ability to drive alignment across teams. Highlighting any relevant experience with B2B SaaS will also strengthen the application."
+}

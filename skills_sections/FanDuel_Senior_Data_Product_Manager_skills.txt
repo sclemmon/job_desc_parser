@@ -1,0 +1,13 @@
+TAILORED SKILLS SECTION
+Job: Senior Data Product Manager
+Company: FanDuel
+================================================================================
+
+Areas of Expertise
+===================================================================================================================
+
+    Strong Understanding of SQL             Databricks Expertise            Product Strategy & Roadmapping
+  Strong Understanding of Python          Strong Leadership Skills              Stakeholder Management
+ Experience with Data Technologies     Excellent Communication Skills              Agile Development
+
+================================================================================

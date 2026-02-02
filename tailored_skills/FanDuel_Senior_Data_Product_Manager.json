@@ -1,0 +1,32 @@
+{
+  "source_url": "https://www.linkedin.com/jobs/view/4337872794",
+  "matched_at": "2026-02-02T13:17:48.094514",
+  "job_title": "Senior Data Product Manager",
+  "company": "FanDuel",
+  "match_summary": "The candidate has a strong background in product management and data technologies, with relevant experience in SQL and Python. However, they lack specific experience in the igaming and spectator sports industries.",
+  "tailored_skills_section": {
+    "Technical Skills": [
+      "Strong understanding of SQL",
+      "Strong understanding of python",
+      "Experience working with Data Technologies"
+    ],
+    "Tools & Platforms": [
+      "databricks"
+    ],
+    "Industry Experience": [],
+    "Soft Skills & Leadership": [
+      "Strong leadership skills",
+      "Excellent communication skills",
+      "Self-starter"
+    ]
+  },
+  "gaps": [
+    "Experience in igaming",
+    "Experience working in Gambling Facilities and Casinos",
+    "Experience working in Spectator Sports"
+  ],
+  "partial_matches": [
+    "Experience working in Agile development methodologies"
+  ],
+  "notes": "The candidate should emphasize their experience with data technologies and product management while addressing the lack of specific industry experience in igaming and spectator sports."
+}
