@@ -1,0 +1,33 @@
+{
+  "source_url": "https://www.linkedin.com/jobs/view/4383385670",
+  "matched_at": "2026-03-12T23:16:24.659212",
+  "job_title": "Senior Manager, Product Analytics",
+  "company": "The Coca-Cola Company",
+  "match_summary": "The candidate has a strong background in product analytics and data analysis, with relevant experience in SQL and A/B testing. However, there are gaps in specific industry experience and familiarity with certain product analytics platforms.",
+  "tailored_skills_section": {
+    "Technical Skills": [
+      "Strong SQL skills and experience working with large datasets",
+      "Experience analyzing behavioral data such as funnels, cohorts, and user journeys",
+      "Experience designing or evaluating product experiments (A/B tests, pilots, or controlled rollouts)",
+      "Data analysis"
+    ],
+    "Tools & Platforms": [
+      "Tableau",
+      "Looker"
+    ],
+    "Industry Experience": [],
+    "Soft Skills & Leadership": [
+      "Collaboration & Influence",
+      "Data Storytelling"
+    ]
+  },
+  "gaps": [
+    "Experience supporting B2B or operational products with complex workflows",
+    "Familiarity with product analytics platforms (Amplitude, Mixpanel, GA4)",
+    "Industry experience in Manufacturing, Food and Beverage Manufacturing, or Food and Beverage Services"
+  ],
+  "partial_matches": [
+    "Experience working closely with product managers, designers, and engineers"
+  ],
+  "notes": "The candidate should emphasize their strong SQL and data analysis skills, as well as their experience with A/B testing. They may want to address the gaps in industry experience and familiarity with specific analytics platforms in their cover letter."
+}
