@@ -1,0 +1,43 @@
+{
+  "source_url": "https://www.linkedin.com/jobs/view/4388528211",
+  "matched_at": "2026-03-24T12:04:47.353784",
+  "job_title": "Senior Product Manager - Revenue/AR",
+  "company": "Salesforce",
+  "match_summary": "The candidate has a strong alignment with the required skills for the Senior Product Manager role, particularly in product management, cross-functional collaboration, and data analysis. However, there are some gaps in specific industry experience and preferred skills.",
+  "tailored_skills_section": {
+    "Technical Skills": [
+      "SQL",
+      "Tableau",
+      "Looker"
+    ],
+    "Tools & Platforms": [
+      "SQL",
+      "Tableau",
+      "Looker"
+    ],
+    "Industry Experience": [
+      "Fintech",
+      "Enterprise SaaS"
+    ],
+    "Soft Skills & Leadership": [
+      "cross-functional collaboration",
+      "analytical skills",
+      "communication skills"
+    ]
+  },
+  "gaps": [
+    "Accounts Receivable workflows",
+    "revenue recognition principles",
+    "ERP platforms",
+    "B2B SaaS",
+    "global financial regulations",
+    "CPA"
+  ],
+  "partial_matches": [
+    "roadmapping",
+    "prioritization frameworks",
+    "Agile methodologies",
+    "collaboration"
+  ],
+  "notes": "The candidate should emphasize their experience in product management and data analysis while addressing the gaps in specific financial and accounting knowledge. Highlighting their experience in enterprise SaaS will also be beneficial."
+}
