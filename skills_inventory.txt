@@ -26,6 +26,7 @@ Product experimentation framework design
 Intake and prioritization of cross-functional requests
 Translating technical concepts to business requirements
 A/B Testing
+AI Prototyping
 
 [TECHNICAL_TOOLS]
 SQL
@@ -48,6 +49,7 @@ Azure Document Intelligence
 AWS Textract
 PowerBI
 Data Modeling
+Figma Make
 
 [LANGUAGES_AND_FRAMEWORKS]
 SQL
