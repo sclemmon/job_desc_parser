@@ -50,6 +50,9 @@ AWS Textract
 PowerBI
 Data Modeling
 Figma Make
+Claude
+Copilot
+ChatGPT
 
 [LANGUAGES_AND_FRAMEWORKS]
 SQL
