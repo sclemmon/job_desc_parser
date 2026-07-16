@@ -1,0 +1,39 @@
+{
+  "source_url": "https://www.linkedin.com/jobs/view/4440366944",
+  "matched_at": "2026-07-16T17:12:44.078967",
+  "job_title": "Staff Product Manager - Data and Analytics",
+  "company": "Pearly",
+  "match_summary": "The candidate has a strong background in product management and data analytics, with relevant experience in SQL and data visualization tools. However, there are gaps in industry-specific experience related to dental and healthcare.",
+  "tailored_skills_section": {
+    "Technical Skills": [
+      "data",
+      "analytics",
+      "reporting",
+      "SQL"
+    ],
+    "Tools & Platforms": [
+      "Tableau",
+      "Looker"
+    ],
+    "Industry Experience": [
+      "B2B SaaS",
+      "Fintech",
+      "Payments"
+    ],
+    "Soft Skills & Leadership": [
+      "communication",
+      "stakeholder management",
+      "data-driven decision making"
+    ]
+  },
+  "gaps": [
+    "experience in dental",
+    "experience in healthcare",
+    "experience in RCM"
+  ],
+  "partial_matches": [
+    "AI/ML fluency",
+    "dashboard building"
+  ],
+  "notes": "Highlight the candidate's strong data and analytics skills, and consider emphasizing any relevant experience in B2B SaaS that could translate to the healthcare sector."
+}

@@ -1,0 +1,13 @@
+TAILORED SKILLS SECTION
+Job: Staff Product Manager - Data and Analytics
+Company: Pearly
+================================================================================
+
+Areas of Expertise
+===================================================================================================================
+
+          Data Analytics                           Tableau                              Fintech
+       Reporting & Analytics                       Looker                              Payments
+                SQL                               B2B SaaS                         Agile Development
+
+================================================================================
